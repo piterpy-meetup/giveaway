@@ -89,7 +89,7 @@ def verify_choice_cli(hashed_participants, date, username):
             click.echo(f"Yup! {username} is definitely a winner.")
         else:
             click.echo(
-                f"Unfortunately, {username} is not a winner :(. But don't worry, better luck next time!"
+                f"Unfortunately, {username} is not a winner. But don't worry, better luck next time!"
             )
 
 
@@ -112,7 +112,7 @@ def verify_choice_cli(hashed_participants, username):
             f"{username} may not be a winner. But it is present in a list of participants."
         )
     else:
-        click.echo(f"{username} is a creep and does not belong here :(.")
+        click.echo(f"{username} is a creep and does not belong here :(")
 
 
 if __name__ == "__main__":
