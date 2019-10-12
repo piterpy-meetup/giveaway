@@ -1,3 +1,4 @@
+import os
 from datetime import datetime, timezone
 from hashlib import sha256
 from random import seed, choice
@@ -51,3 +52,9 @@ def find_winner(
     for participant in participants:
         if verify_winner(participant, hashed_uname):
             return participant
+
+
+def get_date_from_filename(filename: str) -> datetime:
+    filename = os.path.basename(filename)
+    name, _extension = os.path.splitext(filename)
+    return datetime.strptime(name, '%d-%m-%Y')

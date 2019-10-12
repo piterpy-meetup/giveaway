@@ -13,6 +13,7 @@ from giveaway.core.winner import (
     find_winner,
     verify_winner,
     hash_username,
+    get_date_from_filename
 )
 
 
@@ -43,9 +44,11 @@ def prepare_original_cli(source, destination):
 @click.argument(
     "participants", type=click.Path(exists=True, file_okay=True, dir_okay=False)
 )
-@click.argument("date", type=click.DateTime(formats=["%d-%m-%Y"]))
+@click.argument("date", type=click.DateTime(formats=["%d-%m-%Y"]), required=False)
 def choose_winner_cli(participants, date):
     """choose a winner from PARTICIPANTS while using DATE to count seed"""
+    if date is None:
+        date = get_date_from_filename(participants)
     with open(participants) as fp:
         raw_usernames = load(fp)
     hashed_participants = process_usernames(raw_usernames)
@@ -72,7 +75,7 @@ def prepare_hashed_cli(source, destination):
 @click.argument(
     "hashed_participants", type=click.Path(exists=True, file_okay=True, dir_okay=False)
 )
-@click.argument("date", type=click.DateTime(formats=["%d-%m-%Y"]))
+@click.argument("date", type=click.DateTime(formats=["%d-%m-%Y"]), required=False)
 @click.option(
     "--username", default=None, help="username to compare with a winner's hash"
 )
@@ -81,6 +84,8 @@ def verify_choice_cli(hashed_participants, date, username):
     Verify choice using a HASHED_PARTICIPANTS file and DATE. Optionally you can provide a username to verify
     that it was chosen.
     """
+    if date is None:
+        date = get_date_from_filename(hashed_participants)
     with open(hashed_participants) as fp:
         hashed_participants = load(fp)
     hashed_winner = choose_winner(hashed_participants, date)
