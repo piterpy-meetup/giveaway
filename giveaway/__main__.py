@@ -1,4 +1,4 @@
-from .cli import cli
+from giveaway.cli import cli
 
 if __name__ == "__main__":
     cli()

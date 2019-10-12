@@ -2,15 +2,18 @@ from json import dump, load
 
 import click
 
-from .giveaway import (
+from giveaway.core.typing import UserName
+from giveaway.core.usernames import (
     filter_usernames,
     prepare_username,
     process_usernames,
+)
+from giveaway.core.winner import (
     choose_winner,
     find_winner,
     verify_winner,
     hash_username,
-    UserName)
+)
 
 
 @click.group()
@@ -113,7 +116,3 @@ def verify_choice_cli(hashed_participants, username):
         )
     else:
         click.echo(f"{username} is a creep and does not belong here :(")
-
-
-if __name__ == "__main__":
-    cli()

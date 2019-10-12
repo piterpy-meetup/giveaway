@@ -1,17 +1,11 @@
-import re
 from datetime import datetime, timezone
 from hashlib import sha256
-from random import choice, seed
-from typing import List, Iterable, Optional, NewType, Generator, Any, Iterator
+from random import seed, choice
+from typing import List, Optional
 
-ENCODING = "utf-8"
-VALID_USERNAME = re.compile(r"^@?[0-9A-Za-z_]+$")
-
-Line = NewType("Line", str)
-RawUserName = NewType("RawUserName", str)
-UserName = NewType("UserName", str)
-HashedUserName = NewType("HashedUserName", str)
-Seed = NewType("Seed", str)
+from giveaway.core.constants import ENCODING
+from giveaway.core.typing import HashedUserName, Seed, UserName
+from giveaway.core.usernames import hash_username
 
 
 def count_seed(hashed_participants: List[HashedUserName], date: datetime) -> Seed:
@@ -43,25 +37,6 @@ def choose_winner(
     return choice(hashed_participants)
 
 
-def prepare_username(uname: RawUserName) -> UserName:
-    _, sep, name = uname.lower().rpartition("@")
-    return UserName(name)
-
-
-def hash_username(item: UserName) -> HashedUserName:
-    h = sha256(item.encode(ENCODING))
-    return h.hexdigest()
-
-
-def process_usernames(unames: List[RawUserName]) -> List[HashedUserName]:
-    prepared: Iterable[UserName] = (prepare_username(uname) for uname in unames)
-    hashed: Iterable[HashedUserName] = sorted(
-        hash_username(uname) for uname in prepared
-    )
-    result: List[HashedUserName] = list(hashed)
-    return result
-
-
 def verify_winner(uname: UserName, hashed_uname: HashedUserName) -> bool:
     calculated = hash_username(uname)
     return calculated == hashed_uname
@@ -76,11 +51,3 @@ def find_winner(
     for participant in participants:
         if verify_winner(participant, hashed_uname):
             return participant
-
-
-def is_valid(line: Line) -> bool:
-    return bool(VALID_USERNAME.fullmatch(line))
-
-
-def filter_usernames(lines: Generator[str, Any, None]) -> Iterator[RawUserName]:
-    return filter(is_valid, map(lambda l: l.rstrip(), lines))
