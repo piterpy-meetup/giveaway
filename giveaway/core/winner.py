@@ -1,7 +1,8 @@
+import os
 from datetime import datetime, timezone
 from hashlib import sha256
 from random import seed, choice
-from typing import List, Optional
+from typing import List
 
 from giveaway.core.constants import ENCODING
 from giveaway.core.typing import HashedUserName, Seed, UserName
@@ -24,9 +25,9 @@ def count_seed(hashed_participants: List[HashedUserName], date: datetime) -> See
     return h.hexdigest()
 
 
-def choose_winner(
-    hashed_participants: List[HashedUserName], date: datetime
-) -> HashedUserName:
+def choose_winners(
+    hashed_participants: List[HashedUserName], date: datetime, n: int = 1
+) -> List[HashedUserName]:
     """
     Chooses a winner from a provided list of participants. Note, that to find out the real username we need to call a
     find_winner after all.
@@ -34,7 +35,7 @@ def choose_winner(
     :return: winner's hashed username
     """
     seed(count_seed(hashed_participants, date))
-    return choice(hashed_participants)
+    return [choice(hashed_participants) for _ in range(n)]
 
 
 def verify_winner(uname: UserName, hashed_uname: HashedUserName) -> bool:
@@ -42,12 +43,22 @@ def verify_winner(uname: UserName, hashed_uname: HashedUserName) -> bool:
     return calculated == hashed_uname
 
 
-def find_winner(
-    hashed_uname: HashedUserName, participants: List[UserName]
-) -> Optional[UserName]:
+def find_winners(
+    hashed_unames: List[HashedUserName], participants: List[UserName]
+) -> List[UserName]:
     """
     Given a hashed username and a list of participants' usernames returns a winners' username.
     """
+    winners = []
     for participant in participants:
-        if verify_winner(participant, hashed_uname):
-            return participant
+        if any(
+            verify_winner(participant, hashed_uname) for hashed_uname in hashed_unames
+        ):
+            winners.append(participant)
+    return winners
+
+
+def get_date_from_filename(filename: str) -> datetime:
+    filename = os.path.basename(filename)
+    name, _extension = os.path.splitext(filename)
+    return datetime.strptime(name, "%d-%m-%Y")
