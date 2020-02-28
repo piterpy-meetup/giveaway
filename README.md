@@ -7,9 +7,48 @@ algorithm in order for results being reproducible for every set of parameters. R
 
 ## Usage
 
-Basic usage:
+Preparing a list of participants:
 ```bash
-python -m giveaway COMMAND
+python -m giveaway prepare SOURCE DESTINATION
+```
+The command generates a json list of participants in destination from a provided source (file of newline-separated list
+ of usernames). By a convention it is recommended to name a destination file by the date of the event 
+ (i.e. 26-09-2019.json).
+ 
+Choosing a winner:
+```bash
+python -m giveaway choose /path/to/26-09-2019.json
+```
+It prints out the username of the winner chosen from the list of the participants prepared on the 
+previous step. Optionally you can provide a desired number of winners to choose. This could be done
+ like that:
+```bash
+python -m giveaway choose /path/to/26-09-2019.json --n 2
+```
+
+You can also provide the date to be used as a part of seed explicitly:
+```bash
+python -m giveaway choose PARTICIPANTS 26-09-2019
+```
+
+Preparing a list of hashed participants:
+```bash
+python -m giveaway prepare_hashed /path/to/26-09-2019.json /path/to/hashed/26-09-2019.json
+```
+
+Verifying a given username is in the hashed list of participants:
+```hash
+python -m giveaway verify_participant /path/to/hashed/26-09-2019.json ave2me
+```
+
+Verifying a given username is a winner:
+```hash
+python -m giveaway verify_choice /path/to/hashed/26-09-2019.json --username ave2me
+```
+
+Getting help on available commands:
+```bash
+python -m giveaway --help
 ```
 
 ## Seed generation algorithm description
