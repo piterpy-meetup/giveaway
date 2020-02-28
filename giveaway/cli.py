@@ -9,11 +9,11 @@ from giveaway.core.usernames import (
     process_usernames,
 )
 from giveaway.core.winner import (
-    choose_winner,
-    find_winner,
+    choose_winners,
+    find_winners,
     verify_winner,
     hash_username,
-    get_date_from_filename
+    get_date_from_filename,
 )
 
 
@@ -45,17 +45,18 @@ def prepare_original_cli(source, destination):
     "participants", type=click.Path(exists=True, file_okay=True, dir_okay=False)
 )
 @click.argument("date", type=click.DateTime(formats=["%d-%m-%Y"]), required=False)
-def choose_winner_cli(participants, date):
-    """choose a winner from PARTICIPANTS while using DATE to count seed"""
+@click.option("--n", default=1, show_default=True)
+def choose_winner_cli(participants, date, n):
+    """Choose a winner from PARTICIPANTS while using DATE to count seed"""
     if date is None:
         date = get_date_from_filename(participants)
     with open(participants) as fp:
         raw_usernames = load(fp)
     hashed_participants = process_usernames(raw_usernames)
-    hashed_winner = choose_winner(hashed_participants, date)
+    hashed_winners = choose_winners(hashed_participants, date, n=n)
     participants = [prepare_username(uname) for uname in raw_usernames]
-    winner = find_winner(hashed_winner, participants)
-    click.echo(winner)
+    winners = find_winners(hashed_winners, participants)
+    click.echo(" ".join(winners))
 
 
 @cli.command("prepare_hashed")
@@ -88,7 +89,7 @@ def verify_choice_cli(hashed_participants, date, username):
         date = get_date_from_filename(hashed_participants)
     with open(hashed_participants) as fp:
         hashed_participants = load(fp)
-    hashed_winner = choose_winner(hashed_participants, date)
+    hashed_winner = choose_winners(hashed_participants, date)
     click.echo(f"Winner's hash is {hashed_winner}.")
     if username:
         prepared_username = prepare_username(username)
