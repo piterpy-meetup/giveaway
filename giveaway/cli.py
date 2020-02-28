@@ -80,7 +80,8 @@ def prepare_hashed_cli(source, destination):
 @click.option(
     "--username", default=None, help="username to compare with a winner's hash"
 )
-def verify_choice_cli(hashed_participants, date, username):
+@click.option("--n", default=1, show_default=True)
+def verify_choice_cli(hashed_participants, date, username, n):
     """
     Verify choice using a HASHED_PARTICIPANTS file and DATE. Optionally you can provide a username to verify
     that it was chosen.
@@ -89,11 +90,11 @@ def verify_choice_cli(hashed_participants, date, username):
         date = get_date_from_filename(hashed_participants)
     with open(hashed_participants) as fp:
         hashed_participants = load(fp)
-    hashed_winner = choose_winners(hashed_participants, date)
-    click.echo(f"Winner's hash is {hashed_winner}.")
+    hashed_winners = choose_winners(hashed_participants, date, n=n)
+    click.echo(f"Winners are: {', '.join(hashed_winners)}.")
     if username:
         prepared_username = prepare_username(username)
-        is_winner = verify_winner(prepared_username, hashed_winner)
+        is_winner = any(verify_winner(prepared_username, hashed_winner) for hashed_winner in hashed_winners)
         if is_winner:
             click.echo(f"Yup! {username} is definitely a winner.")
         else:
